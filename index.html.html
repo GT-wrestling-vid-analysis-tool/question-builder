@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open-Ended Question Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+        }
+        
+        .icon {
+            width: 32px;
+            height: 32px;
+            color: #4F46E5;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            margin-bottom: -2px;
+        }
+        
+        .tab:hover {
+            color: #4F46E5;
+        }
+        
+        .tab.active {
+            color: #4F46E5;
+            border-bottom-color: #4F46E5;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+        
+        .button-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        .option-button {
+            padding: 20px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .option-button:hover {
+            border-color: #A5B4FC;
+            background: #F5F7FF;
+        }
+        
+        .option-button.selected {
+            border-color: #4F46E5;
+            background: #EEF2FF;
+        }
+        
+        .option-button .title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .option-button .description {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .option-button .example {
+            font-size: 12px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        .lens-button {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .lens-button .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .lens-button .title {
+            font-size: 13px;
+        }
+        
+        .lens-button .description {
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        .generate-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .generate-btn:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+        
+        .generate-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .questions-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .question-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .question-header {
+            padding: 15px 20px;
+            background: #F9FAFB;
+            border-left: 4px solid #4F46E5;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .question-header:hover {
+            background: #F3F4F6;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+        }
+        
+        .heart-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .heart-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .question-body {
+            padding: 20px;
+            background: #EEF2FF;
+            border-left: 4px solid #4F46E5;
+            display: none;
+        }
+        
+        .question-body.expanded {
+            display: block;
+        }
+        
+        .why-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4338CA;
+            margin-bottom: 8px;
+        }
+        
+        .why-text {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .tip-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #FEF3C7;
+            border: 1px solid #FCD34D;
+            border-radius: 8px;
+        }
+        
+        .tip-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #92400E;
+            margin-bottom: 5px;
+        }
+        
+        .tip-text {
+            font-size: 13px;
+            color: #78350F;
+            line-height: 1.5;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background: #4338CA;
+        }
+        
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            opacity: 0.3;
+        }
+        
+        .favorite-card {
+            border-left: 4px solid #EC4899;
+            padding-left: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .favorite-meta {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .favorite-question {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .favorite-why {
+            padding: 15px;
+            background: #FCE7F3;
+            border-radius: 6px;
+        }
+        
+        .delete-btn {
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        
+        .delete-btn:hover {
+            background: #DC2626;
+        }
+        
+        .scenario-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .scenario-header {
+            padding: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .scenario-header:hover {
+            background: #F9FAFB;
+        }
+        
+        .scenario-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-context {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .scenario-body {
+            padding: 0 20px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .scenario-body.expanded {
+            display: block;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .example-box {
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .good-example {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+        }
+        
+        .bad-example {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+        }
+        
+        .example-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .good-example .example-label {
+            color: #065F46;
+        }
+        
+        .bad-example .example-label {
+            color: #991B1B;
+        }
+        
+        .practice-btn {
+            padding: 10px 20px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .practice-btn:hover {
+            background: #4338CA;
+        }
+        
+        .tips-section {
+            margin-bottom: 15px;
+        }
+        
+        .tips-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .tips-header {
+            padding: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .tips-header:hover {
+            background: #F9FAFB;
+        }
+        
+        .tips-body {
+            padding: 0 20px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .tips-body.expanded {
+            display: block;
+        }
+        
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 15px;
+        }
+        
+        .dos-list, .donts-list {
+            padding-left: 20px;
+        }
+        
+        .dos-list li {
+            border-left: 3px solid #10B981;
+            padding-left: 15px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .donts-list li {
+            border-left: 3px solid #EF4444;
+            padding-left: 15px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .list-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <h1>Open-Ended Question Builder</h1>
+            </div>
+            <p class="subtitle">
+                Learn to ask better questions in different conversation contexts. This tool helps build communication skills
+                for neurodivergent individuals, those with social anxiety, and anyone wanting to improve their conversational abilities.
+            </p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('builder')">Question Builder</button>
+                <button class="tab" onclick="switchTab('practice')">Practice Scenarios</button>
+                <button class="tab" onclick="switchTab('tips')">Conversation Tips</button>
+                <button class="tab" onclick="switchTab('favorites')">Saved Questions (<span id="favorites-count">0</span>)</button>
+            </div>
+            
+            <!-- Question Builder Tab -->
+            <div id="builder-tab" class="tab-content active">
+                <div class="section-title">1. Select Conversation Type</div>
+                <div class="button-grid grid-2" id="conversation-types"></div>
+                
+                <div id="depth-section" style="display:none;">
+                    <div class="section-title">2. Choose Question Depth</div>
+                    <div class="button-grid grid-3" id="depth-levels"></div>
+                </div>
+                
+                <div id="lens-section" style="display:none;">
+                    <div class="section-title">3. Select Focus Lens</div>
+                    <div class="button-grid grid-4" id="focus-lenses"></div>
+                </div>
+                
+                <button id="generate-btn" class="generate-btn" style="display:none;" onclick="generateQuestions()">
+                    Generate Questions
+                </button>
+                
+                <div id="questions-output"></div>
+            </div>
+            
+            <!-- Practice Scenarios Tab -->
+            <div id="practice-tab" class="tab-content">
+                <div id="scenarios-output"></div>
+            </div>
+            
+            <!-- Conversation Tips Tab -->
+            <div id="tips-tab" class="tab-content">
+                <div id="tips-output"></div>
+            </div>
+            
+            <!-- Favorites Tab -->
+            <div id="favorites-tab" class="tab-content">
+                <div class="favorites-header">
+                    <h2>Your Saved Questions</h2>
+                    <button class="export-btn" onclick="exportFavorites()" id="export-btn" style="display:none;">
+                        Export Questions
+                    </button>
+                </div>
+                <div id="favorites-output">
+                    <div class="empty-state">
+                        <p style="font-size:18px; margin-bottom:10px;">No saved questions yet</p>
+                        <p style="font-size:14px;">Click the ❤️ icon on any generated question to save it here for quick reference.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let state = {
+            conversationType: null,
+            depthLevel: null,
+            focusLens: null,
+            favorites: []
+        };
+
+        // Data
+        const conversationTypes = [
+            { value: 'personal', label: 'Personal', description: 'Building deeper personal relationships', example: 'Getting to know someone on a meaningful level' },
+            { value: 'professional', label: 'Professional', description: 'Job interviews, networking, workplace conversations', example: 'Demonstrating interest and engagement professionally' },
+            { value: 'social', label: 'Social', description: 'Casual gatherings, making friends, fitting in', example: 'Participating in group conversations naturally' },
+            { value: 'emotional', label: 'Emotional', description: 'Processing feelings, offering support, vulnerability', example: 'Navigating difficult emotions with others' }
+        ];
+
+        const depthLevels = [
+            { value: 'starter', label: 'Starter Questions', description: 'Opening a conversation, breaking the ice', bloom: 'Understand level' },
+            { value: 'followup', label: 'Follow-up Questions', description: 'Building on previous responses, showing engagement', bloom: 'Analyze level' },
+            { value: 'deep', label: 'Deep Questions', description: 'Exploring meaningful topics, creating connection', bloom: 'Evaluate level' }
+        ];
+
+        const focusLenses = [
+            { value: 'details', label: 'Details', icon: '🔍', description: 'Explore specific aspects' },
+            { value: 'patterns', label: 'Patterns', icon: '🔄', description: 'Identify recurring themes' },
+            { value: 'values', label: 'Values & Ethics', icon: '⚖️', description: 'Understand beliefs' },
+            { value: 'perspectives', label: 'Perspectives', icon: '👓', description: 'See different viewpoints' },
+            { value: 'change', label: 'Change', icon: '⏳', description: 'Explore growth' },
+            { value: 'bigidea', label: 'Big Ideas', icon: '💡', description: 'Core concepts' },
+            { value: 'curiosity', label: 'Curiosity', icon: '❓', description: 'Express wonder' }
+        ];
+
+        // Question Database (condensed for demo - you'll paste full version)
+        const questionDatabase = {
+            personal: {
+                starter: {
+                    details: [
+                        { question: "What does a typical day look like for you?", why: "This question shows interest in their daily life without being intrusive. It's open-ended and allows them to share as much or as little as they're comfortable with." },
+                        { question: "What's something you've been enjoying lately?", why: "This positive question invites sharing about current interests or activities. It's emotionally safe and gives insight into what brings them joy right now." }
+                    ],
+                    patterns: [
+                        { question: "What do you usually do on weekends?", why: "Asking about patterns reveals habits and preferences without feeling too personal." }
+                    ],
+                    values: [
+                        { question: "What's important to you in a friendship?", why: "This question opens dialogue about values in a relatable context." }
+                    ],
+                    perspectives: [
+                        { question: "How would your best friend describe you?", why: "This invites them to share how they think others see them, which reveals self-awareness." }
+                    ],
+                    change: [
+                        { question: "How have your interests changed over the past few years?", why: "This explores personal growth in a non-threatening way." }
+                    ],
+                    bigidea: [
+                        { question: "What does 'home' mean to you?", why: "This explores a universal concept in a personal way." }
+                    ],
+                    curiosity: [
+                        { question: "What's something you've been curious about lately?", why: "This shows interest in their mind and thoughts." }
+                    ]
+                },
+                followup: {
+                    details: [
+                        { question: "What specifically about that appeals to you?", why: "This follow-up digs deeper into something they mentioned, showing active listening." }
+                    ],
+                    values: [
+                        { question: "What makes that so meaningful to you?", why: "This explores the 'why' behind what they shared, getting to their core values." }
+                    ]
+                },
+                deep: {
+                    change: [
+                        { question: "What's the biggest way you've changed as a person, and how do you feel about that change?", why: "This is deeply reflective and evaluative, inviting them to assess their own growth journey." }
+                    ]
+                }
+            },
+            professional: {
+                starter: {
+                    details: [
+                        { question: "What does your typical work day involve?", why: "This shows genuine interest in what they actually do, not just their title." }
+                    ],
+                    values: [
+                        { question: "What attracted you to this field?", why: "This explores motivation and values around career choice." }
+                    ]
+                },
+                followup: {
+                    details: [
+                        { question: "What specific skills does that require?", why: "This shows analytical interest in their expertise." }
+                    ]
+                },
+                deep: {
+                    bigidea: [
+                        { question: "What legacy do you hope to leave in your professional field?", why: "This explores purpose and long-term impact." }
+                    ]
+                }
+            },
+            social: {
+                starter: {
+                    details: [
+                        { question: "How do you know the host?", why: "This is a classic social gathering opener that helps establish connections." }
+                    ],
+                    values: [
+                        { question: "What's your favorite way to spend a weekend?", why: "This reveals what they value in their free time without being too personal." }
+                    ]
+                },
+                followup: {
+                    details: [
+                        { question: "What's that like?", why: "This simple follow-up shows interest and invites elaboration." }
+                    ]
+                },
+                deep: {
+                    bigidea: [
+                        { question: "What gives your life meaning?", why: "This is profoundly personal and meaningful, creating space for existential sharing." }
+                    ]
+                }
+            },
+            emotional: {
+                starter: {
+                    details: [
+                        { question: "How are you doing with everything?", why: "This opens space for emotional sharing without pressure." }
+                    ],
+                    values: [
+                        { question: "What do you need most right now?", why: "This is direct and supportive, showing you want to help meet their needs." }
+                    ]
+                },
+                followup: {
+                    perspectives: [
+                        { question: "What would you tell a friend going through the same thing?", why: "This often reveals self-compassion gaps and helps them access wisdom they'd offer others." }
+                    ]
+                },
+                deep: {
+                    change: [
+                        { question: "What would healing look like for you?", why: "This invites them to envision recovery in their own terms." }
+                    ]
+                }
+            }
+        };
+
+        // Initialize
+        function init() {
+            renderConversationTypes();
+            renderDepthLevels();
+            renderFocusLenses();
+            updateFavoritesCount();
+        }
+
+        function renderConversationTypes() {
+            const container = document.getElementById('conversation-types');
+            container.innerHTML = conversationTypes.map(type => `
+                <button class="option-button" onclick="selectConversationType('${type.value}')">
+                    <div class="title">${type.label}</div>
+                    <div class="description">${type.description}</div>
+                    <div class="example">${type.example}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderDepthLevels() {
+            const container = document.getElementById('depth-levels');
+            container.innerHTML = depthLevels.map(level => `
+                <button class="option-button" onclick="selectDepthLevel('${level.value}')">
+                    <div class="title">${level.label}</div>
+                    <div class="description">${level.description}</div>
+                    <div class="example">${level.bloom}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderFocusLenses() {
+            const container = document.getElementById('focus-lenses');
+            container.innerHTML = focusLenses.map(lens => `
+                <button class="option-button lens-button" onclick="selectFocusLens('${lens.value}')">
+                    <div class="icon">${lens.icon}</div>
+                    <div class="title">${lens.label}</div>
+                    <div class="description">${lens.description}</div>
+                </button>
+            `).join('');
+        }
+
+        function selectConversationType(value) {
+            state.conversationType = value;
+            updateSelection('conversation-types', value);
+            document.getElementById('depth-section').style.display = 'block';
+            clearQuestionsOutput();
+        }
+
+        function selectDepthLevel(value) {
+            state.depthLevel = value;
+            updateSelection('depth-levels', value);
+            document.getElementById('lens-section').style.display = 'block';
+            clearQuestionsOutput();
+        }
+
+        function selectFocusLens(value) {
+            state.focusLens = value;
+            updateSelection('focus-lenses', value);
+            document.getElementById('generate-btn').style.display = 'block';
+            clearQuestionsOutput();
+        }
+
+        function updateSelection(containerId, value) {
+            const buttons = document.querySelectorAll(`#${containerId} .option-button`);
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            event.target.closest('.option-button').classList.add('selected');
+        }
+
+        function clearQuestionsOutput() {
+            document.getElementById('questions-output').innerHTML = '';
+        }
+
+        function generateQuestions() {
+            const { conversationType, depthLevel, focusLens } = state;
+            
+            if (!conversationType || !depthLevel || !focusLens) {
+                alert('Please select all three options');
+                return;
+            }
+
+            const questions = questionDatabase[conversationType]?.[depthLevel]?.[focusLens] || [];
+            
+            if (questions.length === 0) {
+                alert('No questions found for this combination');
+                return;
+            }
+
+            const output = document.getElementById('questions-output');
+            output.innerHTML = `
+                <div class="questions-section">
+                    <h2 style="margin-bottom:20px;">Your Questions</h2>
+                    ${questions.map((q, index) => `
+                        <div class="question-card">
+                            <div class="question-header" onclick="toggleQuestion(${index})">
+                                <div class="question-text">"${q.question}"</div>
+                                <button class="heart-btn" onclick="event.stopPropagation(); addToFavorites(${index})">
+                                    ❤️
+                                </button>
+                            </div>
+                            <div class="question-body" id="question-${index}">
+                                <div class="why-title">Why this question works:</div>
+                                <div class="why-text">${q.why}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="tip-box">
+                        <div class="tip-title">💡 Learning Tip</div>
+                        <div class="tip-text">
+                            Practice these questions in safe environments first. Notice how people respond and adjust based on 
+                            their comfort level. The best conversations happen when both people feel heard and valued.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Expand all by default
+            questions.forEach((_, index) => {
+                document.getElementById(`question-${index}`).classList.add('expanded');
+            });
+        }
+
+        function toggleQuestion(index) {
+            const body = document.getElementById(`question-${index}`);
+            body.classList.toggle('expanded');
+        }
+
+        function addToFavorites(index) {
+            const { conversationType, depthLevel, focusLens } = state;
+            const questions = questionDatabase[conversationType]?.[depthLevel]?.[focusLens] || [];
+            const question = questions[index];
+            
+            if (!question) return;
+            
+            const favorite = {
+                ...question,
+                conversationType,
+                depthLevel,
+                focusLens,
+                id: Date.now()
+            };
+            
+            state.favorites.push(favorite);
+            updateFavoritesCount();
+            alert('Question saved to favorites!');
+        }
+
+        function updateFavoritesCount() {
+            document.getElementById('favorites-count').textContent = state.favorites.length;
+            document.getElementById('export-btn').style.display = state.favorites.length > 0 ? 'block' : 'none';
+        }
+
+        function renderFavorites() {
+            const output = document.getElementById('favorites-output');
+            
+            if (state.favorites.length === 0) {
+                output.innerHTML = `
+                    <div class="empty-state">
+                        <p style="font-size:18px; margin-bottom:10px;">No saved questions yet</p>
+                        <p style="font-size:14px;">Click the ❤️ icon on any generated question to save it here for quick reference.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            output.innerHTML = `
+                <p style="font-size:14px; color:#6b7280; margin-bottom:20px;">
+                    You have ${state.favorites.length} saved question${state.favorites.length !== 1 ? 's' : ''}. 
+                    Export them to a text file for offline reference or printing.
+                </p>
+                ${state.favorites.map(fav => `
+                    <div class="favorite-card">
+                        <div class="favorite-meta">
+                            ${getTypeLabel(fav.conversationType)} • ${getDepthLabel(fav.depthLevel)} • ${getLensLabel(fav.focusLens)}
+                        </div>
+                        <div class="favorite-question">"${fav.question}"</div>
+                        <div class="favorite-why">
+                            <div style="font-size:13px; font-weight:600; color:#DB2777; margin-bottom:5px;">
+                                Why this question works:
+                            </div>
+                            <div style="font-size:13px; color:#374151;">
+                                ${fav.why}
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="removeFromFavorites(${fav.id})">
+                            Remove
+                        </button>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function removeFromFavorites(id) {
+            state.favorites = state.favorites.filter(fav => fav.id !== id);
+            updateFavoritesCount();
+            renderFavorites();
+        }
+
+        function exportFavorites() {
+            if (state.favorites.length === 0) return;
+            
+            const textContent = state.favorites.map(fav => `
+Question: ${fav.question}
+Category: ${getTypeLabel(fav.conversationType)} - ${getDepthLabel(fav.depthLevel)} - ${getLensLabel(fav.focusLens)}
+Why it works: ${fav.why}
+${'='.repeat(80)}
+            `).join('\n');
+            
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'my-saved-questions.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function getTypeLabel(value) {
+            return conversationTypes.find(t => t.value === value)?.label || value;
+        }
+
+        function getDepthLabel(value) {
+            return depthLevels.find(d => d.value === value)?.label || value;
+        }
+
+        function getLensLabel(value) {
+            return focusLenses.find(l => l.value === value)?.label || value;
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Render content for specific tabs
+            if (tabName === 'favorites') {
+                renderFavorites();
+            } else if (tabName === 'practice') {
+                renderScenarios();
+            } else if (tabName === 'tips') {
+                renderTips();
+            }
+        }
+
+        function renderScenarios() {
+            const scenarios = [
+                {
+                    id: 1,
+                    title: "Job Interview - Technology Company",
+                    context: "You're interviewing for a software developer position. The interviewer just finished explaining the company's main product.",
+                    challenges: ["Showing interest without seeming scripted", "Demonstrating technical curiosity"],
+                    goodExample: "What technical challenges is your team currently working through?",
+                    whyGood: "This shows you're thinking about the real work, not just the job description.",
+                    avoidExample: "So... do you like working here?",
+                    whyAvoid: "This is closed-ended and doesn't show specific interest in the role."
+                },
+                {
+                    id: 2,
+                    title: "Social Gathering - Friend's Party",
+                    context: "You're at a friend's birthday party and don't know many people. Someone mentions they just got back from a trip.",
+                    challenges: ["Transitioning from small talk to real conversation", "Finding common ground"],
+                    goodExample: "What was that like? What stood out most to you?",
+                    whyGood: "This invites them to share their experience from their perspective.",
+                    avoidExample: "Where did you stay? How much did it cost?",
+                    whyAvoid: "These are logistics questions that can feel like an interrogation."
+                }
+            ];
+            
+            document.getElementById('scenarios-output').innerHTML = scenarios.map(s => `
+                <div class="scenario-card">
+                    <div class="scenario-header" onclick="toggleScenario(${s.id})">
+                        <div class="scenario-title">${s.title}</div>
+                        <div class="scenario-context">${s.context}</div>
+                    </div>
+                    <div class="scenario-body" id="scenario-${s.id}">
+                        <div style="margin-top:15px;">
+                            <div style="font-size:13px; font-weight:600; margin-bottom:10px;">Common Challenges:</div>
+                            <ul style="padding-left:20px; margin-bottom:20px;">
+                                ${s.challenges.map(c => `<li style="margin-bottom:5px; font-size:14px;">${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="example-grid">
+                            <div class="example-box good-example">
+                                <div class="example-label">✓ Good Example:</div>
+                                <div style="font-style:italic; margin-bottom:8px;">"${s.goodExample}"</div>
+                                <div style="font-size:12px;">${s.whyGood}</div>
+                            </div>
+                            <div class="example-box bad-example">
+                                <div class="example-label">✗ Avoid:</div>
+                                <div style="font-style:italic; margin-bottom:8px;">"${s.avoidExample}"</div>
+                                <div style="font-size:12px;">${s.whyAvoid}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleScenario(id) {
+            const body = document.getElementById(`scenario-${id}`);
+            body.classList.toggle('expanded');
+        }
+
+        function renderTips() {
+            const tips = {
+                general: {
+                    title: 'General Conversation Principles',
+                    subtitle: 'Foundational principles that apply to all types of conversations',
+                    dos: [
+                        "Listen actively - focus on what they're saying, not just waiting for your turn to speak",
+                        "Ask follow-up questions that build on what they just said",
+                        "Show genuine curiosity about their experiences and perspectives",
+                        "Use open body language - face them, make appropriate eye contact",
+                        "Allow comfortable pauses - silence can be okay in conversation"
+                    ],
+                    donts: [
+                        "Don't interrupt or finish their sentences for them",
+                        "Don't make everything about you or constantly redirect to your experiences",
+                        "Don't give unsolicited advice unless they specifically ask for it",
+                        "Don't minimize their feelings with phrases like 'at least...' or 'it could be worse'",
+                        "Don't interrogate - balance questions with your own sharing"
+                    ]
+                },
+                personal: {
+                    title: 'Personal Conversations',
+                    dos: [
+                        "Build trust gradually - share vulnerably to invite reciprocal sharing",
+                        "Be consistent and reliable in your interactions",
+                        "Respect boundaries - not everyone opens up at the same pace"
+                    ],
+                    donts: [
+                        "Don't pressure them to share before they're ready",
+                        "Don't gossip about mutual friends or break confidences",
+                        "Don't compete over who has it worse or better"
+                    ]
+                },
+                professional: {
+                    title: 'Professional Conversations',
+                    dos: [
+                        "Be genuinely interested in their work and expertise",
+                        "Ask thoughtful questions that show you've done your research",
+                        "Follow up on previous conversations to show continuity"
+                    ],
+                    donts: [
+                        "Don't make it all about networking or what they can do for you",
+                        "Don't be overly casual in professional settings",
+                        "Don't ask for job referrals or favors in first conversations"
+                    ]
+                }
+            };
+            
+            document.getElementById('tips-output').innerHTML = Object.entries(tips).map(([key, tip]) => `
+                <div class="tips-section">
+                    <div class="tips-card">
+                        <div class="tips-header" onclick="toggleTip('${key}')">
+                            <div class="scenario-title">${tip.title}</div>
+                            ${tip.subtitle ? `<div style="font-size:13px; color:#6b7280; margin-top:5px;">${tip.subtitle}</div>` : ''}
+                        </div>
+                        <div class="tips-body expanded" id="tip-${key}">
+                            <div class="tips-grid">
+                                <div>
+                                    <div class="list-title" style="color:#10B981;">✓ Do's</div>
+                                    <ul class="dos-list">
+                                        ${tip.dos.map(d => `<li>${d}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div>
+                                    <div class="list-title" style="color:#EF4444;">✗ Don'ts</div>
+                                    <ul class="donts-list">
+                                        ${tip.donts.map(d => `<li>${d}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') + `
+                <div class="card" style="background:linear-gradient(135deg, #EEF2FF 0%, #F3E8FF 100%); border:2px solid #C4B5FD; margin-top:20px;">
+                    <h3 style="margin-bottom:15px;">Remember</h3>
+                    <div style="font-size:14px; line-height:1.8;">
+                        <p style="margin-bottom:12px;"><strong>Practice makes progress:</strong> Don't expect perfection. Every conversation is an opportunity to learn.</p>
+                        <p style="margin-bottom:12px;"><strong>Authenticity over perfection:</strong> People connect with genuine interest more than polished performance.</p>
+                        <p style="margin-bottom:12px;"><strong>Read the room:</strong> Pay attention to body language, tone, and energy. Adjust your approach accordingly.</p>
+                        <p style="margin-bottom:12px;"><strong>It's okay to be nervous:</strong> Many people feel anxious in conversations. Acknowledging this can actually help.</p>
+                        <p><strong>You don't need all the answers:</strong> "I don't know" or "Tell me more" are perfectly valid responses.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTip(key) {
+            const body = document.getElementById(`tip-${key}`);
+            body.classList.toggle('expanded');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
